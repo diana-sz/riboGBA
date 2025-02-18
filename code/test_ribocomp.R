@@ -14,37 +14,37 @@ modelname <- "P17_1"
 rna_id <- "rRNA"  # rRNA ID for calculation of ribosome composition
 is.reversible <- 1
 
-suppressMessages(source("Readmodelods.R"))
+suppressMessages(source("Readmodelods_v2.R"))
 source("GBA_Kinetics.R")
 source('f0_alt.R')
 source("GBA_solver.R")
 
 
-results <- data.frame(matrix(ncol=7, nrow=0))
-colnames(results) <- c("xrp", "kdegmax", "Kval", "mu_opt", "free_rRNA", "total_r_mass", "deg_ratio", "convergence")
+
 original_r_kcat <- kcatf[r]
 original_rRNase_kcat <- kcatf[which(reaction=="rRNase")]
 original_K_rRNase <- K["rRNA", "rRNase"]
 
-kdegmax_to_test <- c(5000,10000,20000)
-Ks_to_test <- c(1,10,30)
-ribocomp_to_test <- seq(from=0.1, to=0.8, length.out=10)
+kdegmax_to_test <- c(1000, 2000, 5000)
+Ks_to_test <- c(1,5,10)
+ribocomp_to_test <- seq(from=0.1, to=0.8, length.out=8)
 
 
-pdf(paste0("../results/GBA_Model_",modelname,"ribocomp_test.pdf"),
+pdf(paste0("../figures/GBA_Model_", modelname, "ribocomp_test.pdf"),
     title=paste("Parameter testing", modelname), width=5, height=5)
 
 for (kdegmax in kdegmax_to_test){
   for (Kval in Ks_to_test){
+    results <- data.frame(matrix(ncol=8, nrow=0))
+    colnames(results) <- c("xrp", "kdegmax", "Kval", "mu_opt", "free_rRNA", "total_r_mass", "deg_ratio", "convergence")
+
     for (xrp in ribocomp_to_test){
       
       ribcomp <- xrp
       kcatf[r] <- original_r_kcat/(xrp/0.36)
       K["rRNA", "rRNase"] <- Kval
-      hill <- 4
+      hill <- 3
       kcatf[which(reaction=="rRNase")] <- kdegmax*(1-(xrp^hill/(xrp^hill+0.2^hill)))
-      
-      #suppressMessages(source('f0.R'))
       
       error_check <- try({source("GBA_solver.R")}, silent = TRUE)
       if(class(error_check) == "try-error"){
@@ -77,8 +77,8 @@ for (kdegmax in kdegmax_to_test){
     shapes <- rep(19, nrow(results))
     non_converged <- which(results$convergence == -1)
     
-    shapes[non_converged] <- 21
-    plot(mu_opt ~ xrp, data=results[(results$kdegmax == kdegmax) | (results$Kval == Kval),],
+    #shapes[non_converged] <- 21
+    plot(mu_opt ~ xrp, data=results,
          xlab = "Protein mass fraction in ribosome",
          ylab = bquote("Growth rate" ~ "[" * h^-1 * "]"),
          main = bquote(k[deg]^max ~ .(kdegmax) ~ K ~ .(Kval)),
@@ -86,8 +86,7 @@ for (kdegmax in kdegmax_to_test){
          pch = shapes, cex = 1.3,
          cex.lab = 1.3)
   }
-  
-  }
+} 
 
 dev.off()
 
