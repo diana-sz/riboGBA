@@ -1,36 +1,77 @@
-# Initial value subproblem: linear optimization to find maximal ribosome flux
-# fraction f^r, with a minimal production of each metabolite. The constraints 
-# are mass conservation (M*f = b) and surface flux balance (sM*f = 1)
+# f0 ########################################################
+# estimates f0 by minimizing total protein at given mu_data 
 
-# minimal biomass fractions b
+# min protein in DW parameter 
+min_cp <- 0.6
 
-min_b <- 1/ni/10
+# average Km per substrate
+aKm <- colSums(t(K[-n,])) + 2*colSums(t(KA[-n,]))  
+
+aKm[aKm == 0] <- 10
+
+lowerp <- min_cp # for E. coli ~ 55% of DW is protein [Cayley]
+
+# Here we estimate the lower bound for metabolite concentrations factions := c_m/rho
+# for a given protein density fraction min_cp as: the density fraction left for metabolites (1 - min_cp) x 
+# the estimated c_m via their average Km, normalized by their total (aKm[-p]/sum(aKm[-p])) divided by a factor of 2
+# to give some "slack" for the minimal metabolite bounds (if factor = 1, there would be no slack). Then
+# later in the while loop below we always give more "slack" for the lower bounds if the linear optimization
+# finds no solution
+lowerm <- (1 - min_cp)*(aKm[-p]/sum(aKm[-p]))/2
+           
+lowerb <- c(lowerm,lowerp)
+
+# for models with water
+if ("H2O" %in% i_reactant) {
+  
+  # normalizes again
+  lowerb <- lowerb/(10*sum(lowerb))
+  
+  lowerb[i_reactant == "H2O"] <- 0.7
+  
+  # now these refer to the total bouyant density
+  lowerb[p] <- min_cp*340/1100
+  
+}
+
+# now tries to find f0 for the given min_cp, if not successful, tries lower min_cp
+
+f0 <- rep(0,r)
+
+number.tests <- 0
+
+while(sum(f0) == 0 & number.tests < 30 ) {
 
 # defining parameters
+objective.fn <- 1/kcatf    # to minimize the sum f/kcat
 
-objective.fn <- c(rep(0,nj-1),1)
-const.mat <- rbind(M[-ni,],sM)
-const.dir <- c(rep(">=",ni-1),"=")
-const.rhs <- c(rep(min_b,ni-1), 1)
+const.mat <- rbind(M,sM,diag(r)) # flux balance, density, non-negative f
+
+const.dir <- c(rep(">=",p),"=",rep(">=",r) )
+
+const.rhs <- c(lowerb, 1, min_f+0.001)
 
 # solving model
 
-lp.solution <- lp("max", objective.fn, const.mat, const.dir, const.rhs)
+lp.solution <- lp("min", objective.fn, const.mat, const.dir, const.rhs)
 
 # solution to the linear optimization
 
-f0 <- lp.solution$solution
+f0_linear <- lp.solution$solution
 
-# stops if linear optimization didn't find solution
+f0 <- f0_linear
 
-if (sum(f0) == 0)  stop("no feasible solution found for initial f0")
+number.tests <- number.tests + 1
 
-# stops if solution is not a valid state for the nonlinear problem due to
-# negative growth rate or concentrations
+if (sum(f0) == 0) lowerb <- lowerb/1.1
 
-rho <- rho_cond[1]
+}
 
-x  <- x_cond[,1]
+print("Initial f0:")
+print(f0)
 
-if (TRUE %in% c(mu(f0) < 0, p(f0) < 0, ci(f0) < 0)) stop("initial f0 is not a 
-                                    valid state for the nonlinear optimization")
+
+
+
+
+

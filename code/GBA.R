@@ -1,123 +1,66 @@
-# GBA model solver
+# GBA solver ###################################################################
 
-# Clear variables
-rm(list=ls(all=TRUE))
-
-require('rstudioapi') 
-require('readODS')
-require('nloptr')
-require('Matrix')
-require('lpSolve')
-
-# Sets working directory to source file location ###############################
-
-directory <- dirname(getActiveDocumentContext()$path)
-
-setwd(directory) 
-
-# Model name here ##############################################################
-
-modelname <- "C"
+# # Clear variables
+# rm(list=ls(all=TRUE))
+# 
+# require('rstudioapi') 
+# require('readODS')
+# require('nloptr')
+# require('Matrix')
+# require('MASS')
+# require('lpSolve')
+# require('gplots')
+# 
+# # Sets working directory to source file location ###############################
+# 
+# directory <- dirname(getActiveDocumentContext()$path)
+# 
+# setwd(directory) 
+# 
+# # Model name here ##############################################################
+# 
+# modelname <- "L3"
+# 
+# # Forces all reactions to be irreversible if desired
+# 
+# is.reversible <- 0
+# 
+# predict.parameters <- 0
 
 # Reads model saved as .ods file ###############################################
 
-source("Readmodelods_v2.R")
+suppressMessages(source("Readmodelods.R"))
 
-# Definitions ##################################################################
+if (is.reversible == 0) modelname <- paste(modelname,"i",sep="")
 
-# index for external reactants
-n <- 1: dim(x_cond)[1]
+# kinetics #####################################################################
 
-# number of external reactants
-nx <- dim(x_cond)[1]
+source("GBA_Kinetics.R")
 
-# number of growth conditions
-n_conditions <- dim(x_cond)[2]
+# Singular Growth Modes ########################################################
 
-# names of internal reactants
-i_reactant <- reactant[-n]
+#source('f0.R')
+source('f0_alt.R')
 
-# number of internal reactants
-ni <- dim(M)[1]
+# Predicts kinetic parameters based on mu and phi data #########################
 
-# number of reactions
-nj <- dim(M)[2]
+if (predict.parameters > 0) source("Parameter_prediction.R")
 
-# the sum of each M column 
-sM <- colSums(M)
 
-# delete numerical artifacts
-sM[abs(sM) < 1e-10] <- 0
+# Optimization on f ############################################################
 
-# indexes for reactions: s (transport), e (enzymatic), and ribosome r 
+source("GBA_solver.R") 
 
-e <- c(1:(nj-1))[sM[1:(nj-1)] == 0]  
 
-s <- c(1:(nj-1))[-e]
-
-r <- nj   # (the ribosome is by default the last reaction)
-
-# indexes: m (metabolite), a (all proteins)
-
-m <- 1:(ni-1)
-
-a <- ni   # (the last row by default corresponds to all proteins)
-
-# number of transport reactions
-ns <- length(s)
-
-# tau (irreversible Michaelis-Menten kinetics) #################################
-tau <- function(c){
-  
-  # all concentrations x,c
-  xc <- c(x, c) 
-  
-  tauj <- rep(0,nj)
-  
-  for (j in 1:nj) {
-    
-    tauj[j] <- as.numeric(prod(1 + K[,j]/xc)/kcat[j]) 
-    
-  }
-  
-  return(tauj)
-}
-
-# derivative with respect to c
-dtau <- function(c){
-  
-  # all concentrations x,c
-  xc <- c(x, c) 
-  
-  ditauj <- matrix(rep(0,nj*ni),ncol=ni)
-  
-  for (j in 1:nj) {
-    
-    for (i2 in 1:ni) {
-      
-      y <- i2 + nx # position of i in terms of all reactants xc
-      
-      ditauj[j,i2] <- -as.numeric((K[y,j]/(c[i2]^2))*prod(1 + 
-                                                            K[-y,j]/xc[-y])/kcat[j]) 
-      
-    }
-    
-  }
-  
-  return(ditauj)
-  
-}
-
-# Optimization #################################################################
-
-source("Optimization.R") 
-
-# Showing results ##############################################################
+# Exporting results ############################################################
 
 # Exporting csv file with results #######
 
 source("Exportcsv.R")
 
+
 # Plots #################################
 
-source("Plots.R")
+source("GBA_Plots_diana.R")
+
+# dev.off()
