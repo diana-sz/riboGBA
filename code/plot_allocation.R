@@ -4,7 +4,7 @@ library(here)
 
 setwd(paste0(here(), "/code/Results GBA"))
 
-opt_data <- read.csv("GBA Model P17old, mean time (25.5s) results.csv", row.names = 1)
+opt_data <- read.csv("GBA Model A11, mean time (25.5s) results.csv", row.names = 1)
 reactants <- colnames(opt_data)[5:17]
 p_opt <- opt_data[,grep("p.",colnames(opt_data))]
 phi_opt <- p_opt/opt_data[,"p"]

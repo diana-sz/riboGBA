@@ -10,7 +10,7 @@ bremer <- read.csv("bremer_percent_transcription.csv")
  
 colnames(biomass)[6] <- 'Rest'
 biomass[,2:6] <- biomass[,2:6]/100
-size <- 1.3
+size <- 1.5
 
 
 coloraxis <- "black"
@@ -61,10 +61,18 @@ par(new=FALSE, xpd=FALSE)
 
 colors <- rev(brewer.pal(5, "Paired"))
 cum_comp <- t(apply(biomass[,2:ncol(biomass)], 1, cumsum))
-plot(NA, xlim = c(0, max(biomass$mu)), ylim=c(0, 1),
+
+
+png(paste0("../figures/experimental_biomass.png"), 
+    type="cairo", units="cm",
+    width=15, height=12, res=300)
+par(mar = c(5,5,1,1), mfrow=c(1,1))
+
+plot(NA,  xlim=c(0, 1), #max(ordered_mu)),
+     ylim=c(0, 1),
      yaxs="i", xaxs="i",
-     xaxt = "n", yaxt = "n",
-     #cex.lab = size*1.5, cex.axis = size*1.3,
+     #xaxt = "n", yaxt = "n",
+     cex.lab = size, cex.axis = size,
      xlab=bquote("Growth rate"~ mu ~ (h^-1)), 
      ylab="Experimental biomass")
 for(i in ncol(cum_comp):1){
@@ -73,13 +81,17 @@ for(i in ncol(cum_comp):1){
           col=col, border=col)
   par(new=TRUE)
 }
-add_axes()
+#add_axes()
 #legend('bottomleft', colnames(biomass)[ncol(biomass):2], col = colors, pch = 15, cex=size)
 
 
 par(xpd=TRUE)
 for(mu in biomass$mu){
-  arrows(x0=mu, y0=1.05, x1=mu, y1=1.00, length=0.05, code=2, lwd=1.5)
+  arrows(x0=mu, y0=1.05, x1=mu, y1=1.00, length=0.05, code=2, lwd=2)
 }
 par(xpd=FALSE)
+dev.off()
+
+
+
 

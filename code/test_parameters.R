@@ -2,21 +2,29 @@ rm(list=ls(all=TRUE))
 
 library(viridis)
 library(here)
-require('rstudioapi') 
-require('readODS')
-require('nloptr')
-require('lpSolve')
+library('rstudioapi') 
+library('readODS')
+library('nloptr')
+library('lpSolve')
 
 directory <- paste0(here(), "/code")
 setwd(directory) 
 
-modelname <- "P17_1"
+modelname <- "A15"
 rna_id <- "rRNA"  # rRNA ID for calculation of ribosome composition
-is.reversible <- 1
+is.reversible <- 0
+rescale_kcats <- TRUE
+predict.parameters <- TRUE
+fer_res_factor <- 5
 
-suppressMessages(source("Readmodelods.R"))
+suppressMessages(source("Readmodelods_v2.R"))
+
+rho_cond <- rho_cond[1]
+n_conditions <- 1
+
 source("GBA_Kinetics.R")
 source('f0_alt.R')
+source("Parameter_prediction.R")
 source("GBA_solver.R")
 
 # to do - make this into a csv and import it / make it automatic to test all parameters
@@ -27,7 +35,7 @@ original_K <- K
 original_KA <- KA
 original_kcatf <- kcatf
 
-pdf(paste0("../results/GBA_Model_",modelname,"parameter_test.pdf"),
+pdf(paste0("../figures/GBA_Model_",modelname,"_parameter_test.pdf"),
     title=paste("Parameter testing", modelname), width=15, height=5)
 
 
@@ -129,7 +137,7 @@ for(par_i in 1:nrow(tested_parameters)){
   palette_mapped <- color_palette[as.numeric(cut(mu_normalized, breaks = 100))]
   shapes <- rep(19, nrow(results))
   non_converged <- which(results$convergence == -1)
-  shapes[non_converged] <- 21
+  #shapes[non_converged] <- 21
   
   plot(results$kcat_val, results$xRP,
        col = palette_mapped,

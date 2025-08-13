@@ -152,13 +152,14 @@ xlim <- c(0,1.15)
 
 #+ fig.height = 29.7, fig.width = 12
 
+pdf("figures/proteomics_ecocyc.pdf")
 all_rib_data <- data.frame()
-par(mfcol=c(9, length(proteomics_datasets)))
-par(mfcol=c(2,2))
+par(mfrow=c(2, 2), mar = c(5,5,3,1))
+#par(mfcol=c(2,2))
 
 for(dataset in names(proteomics_datasets)){
   legend <- TRUE
-  if(dataset != "Merged"){legend <- FALSE}
+  #if(dataset != "Merged"){legend <- FALSE}
   current_dataset <- proteomics_datasets[[dataset]]
   current_growth <- growth_datasets[[dataset]]
   
@@ -294,6 +295,21 @@ for(dataset in names(proteomics_datasets)){
   title(dataset)
   
   
+  
+  # AAs, nts, lipids
+  lip <- get_sector_fraction(c("lipid biosynthetic process"), current_dataset, gene_annot)
+  sectors <- list("Lipid metabolism" = lip)
+  
+  plot_and_fit(sectors, 
+               current_growth, 
+               ylim = c(0,0.05), 
+               xlim = xlim,
+               legend = legend)
+  title(dataset)
+  
+  
+  
+  
   # RNA degradation
   rrnases <- get_sector_fraction(c("rRNA catabolic process"), current_dataset, gene_annot)
   trnases <- get_sector_fraction(c("tRNA decay"), current_dataset, gene_annot)
@@ -317,6 +333,6 @@ write.csv(all_rib_data, "data/ribosome_data.csv")
 
 
 
-
+dev.off()
 
 
