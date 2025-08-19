@@ -36,7 +36,7 @@ ribo_genes <- get_genes(ecocyc_annot, "structural constituent of ribosome")
 trna_syn <- get_genes(ecocyc_annot, "tRNA aminoacylation")
 etc_genes <- get_genes(ecocyc_annot, "electron transport chain") # subgroup of "energy derivation by oxidation of organic compounds",
 
-transporter_genes <- ecocyc_annot[ecocyc_transporters$New.column == "transmembrane transport", 2]
+transporter_genes <- ecocyc_transporters[ecocyc_transporters$New.column == "transmembrane transport", 2]
 transporter_genes <- strsplit(transporter_genes, " // ")[[1]]
 
 gene_annot <- list()

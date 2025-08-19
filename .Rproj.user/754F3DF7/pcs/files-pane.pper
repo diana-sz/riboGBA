@@ -6,7 +6,7 @@
         },
         {
             "columnIndex": 2,
-            "ascending": true
+            "ascending": false
         }
     ],
     "path": "~/RiboComp_GBA/code"

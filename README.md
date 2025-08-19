@@ -7,6 +7,7 @@ figures/
 * validation_plots.html - other validation datasets (fraction of degraded rRNA, RNAP allocation, biomass composition)
 * GBA_Model_P17_1parameter_test.pdf - model sensitivity to different parameters
 * GBA_Model_P17_1ribocomp_test.pdf - predictions of growth rate at different ribosome compositions and different parameters
+* GBA_model.png - biorender scheme of the model
 
 code/
 
@@ -14,6 +15,7 @@ Scripts to produce figures in the folder figures
 * plot_allocation.R - plot proteome allocation predicted by GBA
 * plot_proteomics_ecocyc.R - plot experimental proteomics data
 * validation_plots.R - plot experimental data
+* test_ribocomp.R - test the effect of ribosome composition on growth rate
 
 code/Results GBA
 * GBA Model P17old, mean time (25.5s) results.csv - results from GBA

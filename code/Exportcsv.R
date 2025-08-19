@@ -19,7 +19,7 @@ colnames(opt_state) <- c("convergence","mu",reactant,paste("tau",reaction),
 
 # export results
 write.csv(opt_state, file = paste("GBA Model ",modelname,
-                            ", mean time (",mean_time,"s) results.csv",sep=""))
+                            " mean time (",mean_time,"s) results.csv",sep=""))
 
 
 setwd(directory)
