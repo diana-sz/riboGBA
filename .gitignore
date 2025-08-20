@@ -1,4 +1,7 @@
-.Rproj.user
-.ipynb_checkpoints
+.Rproj.user/
+.Rhistory
+.ipynb_checkpoints/
 */.ipynb_checkpoints/*
-/old
+**/.ipynb_checkpoints/
+old/
+**/old/

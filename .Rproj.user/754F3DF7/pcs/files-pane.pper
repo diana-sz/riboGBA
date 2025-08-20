@@ -6,8 +6,8 @@
         },
         {
             "columnIndex": 2,
-            "ascending": false
+            "ascending": true
         }
     ],
-    "path": "~/RiboComp_GBA/code"
+    "path": "~/RiboComp_GBA/figures"
 }
