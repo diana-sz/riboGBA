@@ -1,10 +1,9 @@
 library(here)
 library(RColorBrewer)
 
-
-modelname <- "A7simple1"
-data <- read.csv(paste0("../data/", modelname, "_protein_cost_test.csv"), row.names = 1)
-
+setwd(here())
+modelname <- "A7simple_p0"
+data <- read.csv(paste0("data/", modelname, "_protein_cost.csv"), row.names = 1)
 
 
 plot_composition <- function(proteome, target_phi, colors = NULL,
@@ -41,24 +40,22 @@ plot_composition <- function(proteome, target_phi, colors = NULL,
   legend("topright", legend = rev(colnames(proteome)), fill = colors, bty = "n", cex = 0.8)
 }
 
-
-
-for(protein in unique(data$protein)){
+for(rxn in unique(data$reaction)){
   
-  png(paste0("../figures/", modelname, "_", protein, ".png"), 
+  png(paste0("figures/", modelname, "_", rxn, ".png"), 
       type="cairo", units="cm",
       width=22, height=5, res=300)
   par(mfcol=c(1,4), mar = c(4,4,2,0.5))
   
-  one_prot <- data[data$protein == protein, ]
+  one_prot <- data[data$reaction == rxn, ]
   target_phi <- one_prot$phi
   proteome <- one_prot[, grep("p\\.", colnames(one_prot))]
-  biomass <- one_prot[, 8:which(colnames(one_prot)=="p")]
+  biomass <- one_prot[, grep("c\\.", colnames(one_prot))]
   
   mu <- one_prot$mu
   plot(one_prot$phi, mu, xlim = c(0,  max(target_phi)), ylim = c(0,max(mu)),
        pch=one_prot$shape,
-       main = protein,
+       main = rxn,
        xlab = "Proteome fraction", ylab="Growth rate")
   
   plot(one_prot$phi/one_prot$phi[which.max(one_prot$mu)], mu, 

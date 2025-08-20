@@ -22,7 +22,7 @@ rho_cond <- rho_cond[1]
 n_conditions <- 1
 
 phis_to_test <- c(0.001, seq(0.01, 0.2, 0.01))
-kcats_to_test <- c(1, 150)
+kcats_to_test <- c(30, 300)
 alt_concentrations <- c(1e-5, 0.05, 0.2)
 
 
